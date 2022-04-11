@@ -17,8 +17,9 @@
     <nav aria-label="Page navigation" class="my-8" v-if="products">
       <ul class="inline-flex items-center -space-x-px">
         <li>
-          <button :class="{ 'opacity-40 bg-gray-100': !products.prev_page_url }"
-            class="block py-2 px-3 ml-0 leading-tight text-gray-500 bg-white rounded-l-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+          <button :class="{ 'opacity-40 bg-gray-100': !products.prev_page_url }" @click="jumpToPage({url:products.prev_page_url})"
+            class="block py-2 px-3 ml-0 leading-tight text-gray-500 bg-white rounded-l-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+            >
             <span class="sr-only">Previous</span>
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path fill-rule="evenodd"
@@ -28,13 +29,14 @@
           </button>
         </li>
         <li v-for="i in Math.ceil(products.total / products.per_page)" :key="i">
-          <button href="#"
+          <button href="#"  
+            @click="jumpToPage({page:i})"
             :class="{'text-blue-600 bg-blue-100 border-2 border-blue-500 text-blue-500 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 ':i === products.current_page, 'opacity-40 bg-gray-100': i === products.current_page }"
             class=" font-semibold py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
             {{ i }} </button>
         </li>
         <li>
-          <button :class="{ 'opacity-40 bg-gray-100 ': !products.next_page_url }"
+          <button :class="{ 'opacity-40 bg-gray-100 ': !products.next_page_url }" @click="jumpToPage({url:products.next_page_url})"
             class="block py-2 px-3 leading-tight text-gray-500 bg-white rounded-r-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
             <span class="sr-only">Next</span>
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -66,9 +68,26 @@ import { PaginatedData, Product } from './types';
 const products = ref<PaginatedData<Product>>()
 const selectedCategoryId = ref(2)
 
-onMounted(async () => {
-  const data = await axios.get<PaginatedData<Product>>('https://tnorthern.xyz/Edgewood-API/public/api/products')
-  console.log(data.data)
+interface Category {
+  id: number
+  name: string
+}
+
+interface Pagination{
+url: string 
+page: number
+}
+
+async function jumpToPage({url,page}:Partial<Pagination> = {}) {
+  const defaultUrl = 'https://tnorthern.xyz/Edgewood-API/public/api/products';
+  if(!url)  url = defaultUrl;
+  if(page)url = url + '?page=' + page;
+  const data = await axios.get<PaginatedData<Product>>(url)
   products.value = data.data
+}
+
+
+onMounted(async () => {
+  await jumpToPage()
 })
 </script>
