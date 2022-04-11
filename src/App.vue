@@ -74,6 +74,12 @@ import Card from './components/Card.vue'
 import { PaginatedData, Product } from './types';
 // computed: {
 // each product has a category(id), how would you make the products filtered based on the selected category in data? Don't worry about rendering a filtered list, just want to see your thought process
+
+  // Answer:
+  //   simply as i did it bellow, filtering all data to prefered caregory i would 
+  //   1. create new array of filtered categories by avoiding duplicates
+  //   2. make a select box with option `all` and all filtered categories
+  //   3 listen on change of select box so that whenever the value change i will filter the products based on the selected category
 // },
 
 const products = ref<PaginatedData<Product>>()
