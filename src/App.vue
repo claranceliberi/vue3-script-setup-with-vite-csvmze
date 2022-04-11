@@ -8,13 +8,22 @@
     <!-- Display the products in a responsive grid with the above html, max 4 columns(grid or flex acceptable), view the mounted hook for the data source. Expected fields to display are:
     name, image, category, and price
      -->
+
+      <div v-if="products" class="my-8">
+          <span>Filter</span>
+          <select v-model="filterByCategory" class="border-2 border-gray-300 px-4 py-1 ml-4" name="category" id="category">
+            <option value="all">all</option>
+            <option v-for="category in availableCategories" :value="category" :key="category"> {{category}} </option>
+          </select>
+      </div>
+
     <div v-if="products" class="grid grid-cols-4 gap-x-6 gap-y-4">
-      <div v-for="product in products.data">
+      <div v-for="product in filteredProducts">
         <Card :product="product" />
       </div>
     </div>
 
-    <nav aria-label="Page navigation" class="my-8" v-if="products">
+    <nav aria-label="Page navigation" class="flex my-8" v-if="products">
       <ul class="inline-flex items-center -space-x-px">
         <li>
           <button :class="{ 'opacity-40 bg-gray-100': !products.prev_page_url }" @click="jumpToPage({url:products.prev_page_url})"
@@ -47,6 +56,8 @@
           </button>
         </li>
       </ul>
+      <div class="flex-grow"></div>
+      <p class="mx-8"> {{ ((products.current_page - 1 )* products.per_page ) + products.data.length  }} <span class="text-gray-500">in</span> {{products.total}} <span class="text-gray-500">products</span> </p>
     </nav>
 
     <!-- Here's your version of console.log since stackblitz is broken atm -->
@@ -57,7 +68,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted,computed } from 'vue'
 import axios from 'axios'
 import Card from './components/Card.vue'
 import { PaginatedData, Product } from './types';
@@ -66,7 +77,18 @@ import { PaginatedData, Product } from './types';
 // },
 
 const products = ref<PaginatedData<Product>>()
+const filterByCategory = ref<string>('all')
 const selectedCategoryId = ref(2)
+const availableCategories =  computed(() => {
+  return Array.from(new Set(products.value?.data.map(product => product.category)))
+})
+
+const filteredProducts = computed(() => {
+  if (filterByCategory.value === 'all') {
+    return products.value?.data
+  }
+  return products.value?.data.filter(product => product.category === +filterByCategory.value)
+})
 
 interface Category {
   id: number
@@ -85,6 +107,8 @@ async function jumpToPage({url,page}:Partial<Pagination> = {}) {
   const data = await axios.get<PaginatedData<Product>>(url)
   products.value = data.data
 }
+
+
 
 
 onMounted(async () => {
