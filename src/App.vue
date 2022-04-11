@@ -17,7 +17,7 @@
           </select>
       </div>
 
-    <div v-if="products" class="grid grid-cols-4 gap-x-6 gap-y-4">
+    <div v-if="products" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-4">
       <div v-for="product in filteredProducts">
         <Card :product="product" />
       </div>
